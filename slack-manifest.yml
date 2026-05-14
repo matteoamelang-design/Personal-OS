@@ -8,7 +8,7 @@ features:
     always_online: true
   slash_commands:
     - command: /ask
-      url: https://REPLACE_WITH_VERCEL_DOMAIN/api/slack/commands/ask
+      url: https://personal-os-git-main-matteoamelang-6857s-projects.vercel.app/api/slack/commands/ask
       description: Ask the Personal OS a question against the /Claude knowledge base.
       usage_hint: "[your question]"
       should_escape: false
@@ -26,13 +26,13 @@ oauth_config:
       - users:read.email
 settings:
   event_subscriptions:
-    request_url: https://REPLACE_WITH_VERCEL_DOMAIN/api/slack/events
+    request_url: https://personal-os-git-main-matteoamelang-6857s-projects.vercel.app/api/slack/events
     bot_events:
       - message.im
       - reaction_added
   interactivity:
     is_enabled: true
-    request_url: https://REPLACE_WITH_VERCEL_DOMAIN/api/slack/interactivity
+    request_url: https://personal-os-git-main-matteoamelang-6857s-projects.vercel.app/api/slack/interactivity
   org_deploy_enabled: false
   socket_mode_enabled: false
   token_rotation_enabled: false
