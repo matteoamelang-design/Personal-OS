@@ -1,0 +1,38 @@
+display_information:
+  name: Matteo Personal OS
+  description: Personal automation bot — briefings, drafts, monitors, voice capture.
+  background_color: "#0a0a0a"
+features:
+  bot_user:
+    display_name: Personal OS
+    always_online: true
+  slash_commands:
+    - command: /ask
+      url: https://REPLACE_WITH_VERCEL_DOMAIN/api/slack/commands/ask
+      description: Ask the Personal OS a question against the /Claude knowledge base.
+      usage_hint: "[your question]"
+      should_escape: false
+oauth_config:
+  scopes:
+    bot:
+      - chat:write
+      - chat:write.public
+      - im:history
+      - im:read
+      - reactions:read
+      - reactions:write
+      - commands
+      - users:read
+      - users:read.email
+settings:
+  event_subscriptions:
+    request_url: https://REPLACE_WITH_VERCEL_DOMAIN/api/slack/events
+    bot_events:
+      - message.im
+      - reaction_added
+  interactivity:
+    is_enabled: true
+    request_url: https://REPLACE_WITH_VERCEL_DOMAIN/api/slack/interactivity
+  org_deploy_enabled: false
+  socket_mode_enabled: false
+  token_rotation_enabled: false
