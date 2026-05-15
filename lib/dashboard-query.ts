@@ -25,6 +25,14 @@ export type DashboardData = {
       avgQuality: number | null;
     }>;
   };
+  upcoming: {
+    nextMeeting: {
+      eventId: string;
+      eventTitle: string | null;
+      eventStart: string | null;
+      brief: string;
+    } | null;
+  };
   errors: string[];
 };
 
@@ -37,7 +45,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   startOfToday.setUTCHours(0, 0, 0, 0);
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-  const [briefingsRes, draftsRes, heartbeatRes, evalsRes] = await Promise.all([
+  const [briefingsRes, draftsRes, heartbeatRes, evalsRes, upcomingRes] = await Promise.all([
     supabase
       .from("briefings")
       .select("id, type, content, created_at")
@@ -58,6 +66,13 @@ export async function getDashboardData(): Promise<DashboardData> {
       .from("eval_scores")
       .select("workflow, latency_ms, cost_usd, quality_score")
       .gte("created_at", sevenDaysAgo.toISOString()),
+    supabase
+      .from("prep_briefs")
+      .select("event_id, event_title, event_start, brief")
+      .gte("event_start", now.toISOString())
+      .order("event_start", { ascending: true })
+      .limit(1)
+      .maybeSingle(),
   ]);
 
   // Today
@@ -158,5 +173,26 @@ export async function getDashboardData(): Promise<DashboardData> {
     evals = { totalRuns, avgLatencyMs, totalCostUsd, perWorkflow };
   }
 
-  return { today, pending, heartbeat, evals, errors };
+  // Upcoming meeting prep
+  let upcoming: DashboardData["upcoming"] = { nextMeeting: null };
+  if (upcomingRes.error) {
+    errors.push(`prep_briefs: ${upcomingRes.error.message}`);
+  } else if (upcomingRes.data) {
+    const r = upcomingRes.data as {
+      event_id: string;
+      event_title: string | null;
+      event_start: string | null;
+      brief: string;
+    };
+    upcoming = {
+      nextMeeting: {
+        eventId: r.event_id,
+        eventTitle: r.event_title,
+        eventStart: r.event_start,
+        brief: r.brief,
+      },
+    };
+  }
+
+  return { today, pending, heartbeat, evals, upcoming, errors };
 }
