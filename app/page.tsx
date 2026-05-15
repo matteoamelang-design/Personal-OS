@@ -4,6 +4,7 @@ import { PendingCard } from "@/components/pending-card";
 import { HeartbeatCard } from "@/components/heartbeat-card";
 import { EvalCard } from "@/components/eval-card";
 import { PrepCard } from "@/components/prep-card";
+import { MonitorCard } from "@/components/monitor-card";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 300;
@@ -50,6 +51,7 @@ export default async function Home() {
             perWorkflow={data.evals.perWorkflow}
           />
           <PrepCard nextMeeting={data.upcoming.nextMeeting} />
+          <MonitorCard recent={data.alerts.recent} />
         </div>
 
         {data.errors.length > 0 ? (

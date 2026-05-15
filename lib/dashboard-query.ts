@@ -33,6 +33,15 @@ export type DashboardData = {
       brief: string;
     } | null;
   };
+  alerts: {
+    recent: Array<{
+      id: string;
+      source: string;
+      trigger: string;
+      context: Record<string, unknown> | null;
+      createdAt: string;
+    }>;
+  };
   errors: string[];
 };
 
@@ -45,7 +54,8 @@ export async function getDashboardData(): Promise<DashboardData> {
   startOfToday.setUTCHours(0, 0, 0, 0);
   const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 
-  const [briefingsRes, draftsRes, heartbeatRes, evalsRes, upcomingRes] = await Promise.all([
+  const oneDayAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+  const [briefingsRes, draftsRes, heartbeatRes, evalsRes, upcomingRes, alertsRes] = await Promise.all([
     supabase
       .from("briefings")
       .select("id, type, content, created_at")
@@ -73,6 +83,12 @@ export async function getDashboardData(): Promise<DashboardData> {
       .order("event_start", { ascending: true })
       .limit(1)
       .maybeSingle(),
+    supabase
+      .from("monitor_alerts")
+      .select("id, source, trigger, context, created_at")
+      .gte("created_at", oneDayAgo.toISOString())
+      .order("created_at", { ascending: false })
+      .limit(6),
   ]);
 
   // Today
@@ -194,5 +210,28 @@ export async function getDashboardData(): Promise<DashboardData> {
     };
   }
 
-  return { today, pending, heartbeat, evals, upcoming, errors };
+  // Monitor alerts
+  let alerts: DashboardData["alerts"] = { recent: [] };
+  if (alertsRes.error) {
+    errors.push(`monitor_alerts: ${alertsRes.error.message}`);
+  } else {
+    const rows = (alertsRes.data ?? []) as Array<{
+      id: string;
+      source: string;
+      trigger: string;
+      context: Record<string, unknown> | null;
+      created_at: string;
+    }>;
+    alerts = {
+      recent: rows.map((r) => ({
+        id: r.id,
+        source: r.source,
+        trigger: r.trigger,
+        context: r.context,
+        createdAt: r.created_at,
+      })),
+    };
+  }
+
+  return { today, pending, heartbeat, evals, upcoming, alerts, errors };
 }
