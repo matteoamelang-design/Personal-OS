@@ -4,7 +4,7 @@ import { getSupabase } from "@/lib/supabase";
 export type DashboardData = {
   today: {
     briefingsToday: number;
-    latestBriefing: { type: string; createdAt: string } | null;
+    latestBriefing: { type: string; createdAt: string; content: string } | null;
   };
   pending: {
     pendingDrafts: number;
@@ -40,7 +40,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   const [briefingsRes, draftsRes, heartbeatRes, evalsRes] = await Promise.all([
     supabase
       .from("briefings")
-      .select("id, type, created_at")
+      .select("id, type, content, created_at")
       .gte("created_at", startOfToday.toISOString())
       .order("created_at", { ascending: false }),
     supabase
@@ -69,7 +69,11 @@ export async function getDashboardData(): Promise<DashboardData> {
     today = {
       briefingsToday: rows.length,
       latestBriefing: rows[0]
-        ? { type: rows[0].type as string, createdAt: rows[0].created_at as string }
+        ? {
+            type: rows[0].type as string,
+            createdAt: rows[0].created_at as string,
+            content: rows[0].content as string,
+          }
         : null,
     };
   }

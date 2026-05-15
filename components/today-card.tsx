@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 type Props = {
   briefingsToday: number;
-  latestBriefing: { type: string; createdAt: string } | null;
+  latestBriefing: { type: string; createdAt: string; content: string } | null;
 };
 
 const TIME_FMT = new Intl.DateTimeFormat("en-GB", {
@@ -26,13 +26,21 @@ export function TodayCard({ briefingsToday, latestBriefing }: Props) {
           briefing{briefingsToday === 1 ? "" : "s"} today
         </div>
         {latestBriefing ? (
-          <div className="pt-1 text-sm">
-            Latest:{" "}
-            <span className="font-medium capitalize">{latestBriefing.type}</span>
-            <span className="text-muted-foreground">
-              {" "}
-              · {TIME_FMT.format(new Date(latestBriefing.createdAt))}
-            </span>
+          <div className="pt-1 space-y-1">
+            <div className="text-sm">
+              Latest:{" "}
+              <span className="font-medium capitalize">{latestBriefing.type}</span>
+              <span className="text-muted-foreground">
+                {" "}
+                · {TIME_FMT.format(new Date(latestBriefing.createdAt))}
+              </span>
+            </div>
+            {latestBriefing.content ? (
+              <div className="text-xs text-muted-foreground leading-relaxed line-clamp-4 whitespace-pre-line">
+                {latestBriefing.content.slice(0, 400)}
+                {latestBriefing.content.length > 400 ? "…" : ""}
+              </div>
+            ) : null}
           </div>
         ) : (
           <div className="pt-1 text-sm text-muted-foreground">No briefings yet</div>
